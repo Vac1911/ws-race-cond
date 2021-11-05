@@ -25,7 +25,6 @@ router.get('/item/:id/edit', (req, res) => {
     res.render('edit', { title: 'Express', item: item });
 });
 router.get('/item/:id/delete', (req, res) => {
-    storage.remove(parseInt(req.params.id));
-    res.send();
+    res.send(storage.remove(parseInt(req.params.id)) ? 'yes' : 'no');
 });
 //# sourceMappingURL=index.js.map

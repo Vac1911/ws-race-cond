@@ -14,31 +14,13 @@ app.use(bodyParser.json());
 app.use('/', routes);
 
 //initialize a simple http server
-const server = http.createServer(app);
+export const server = http.createServer(app);
 
 //initialize the WebSocket server instance
-const wss = new WebSocket.Server({ server });
+export const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws: WebSocket, req) => {
-    console.log('Connected Recieved from ' + req.url);
-
-    //connection is up, let's add a simple simple event
-    ws.on('message', (message: string) => {
-        message = message.toString();
-
-        //log the received message and send it back to the client
-        console.log('received: (%s)', message);
-
-        const pushRegex = /^push:/;
-        if (pushRegex.test(message)) {
-            message = message.replace(pushRegex, '');
-            storage.push(JSON.parse(message));
-            refresh();
-        }
-    });
-
-    //send immediatly a feedback to the incoming connection
-    ws.send('Connected');
+    console.log('Connection Received');
 });
 
 function refresh() {

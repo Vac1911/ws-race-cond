@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from "path";
+import {wss} from "../server";
 
 const storagePath = path.join(__dirname, './items.json');
 let incrementor = 1;
@@ -13,7 +14,7 @@ interface Item {
 function init() {
     try {
         fs.accessSync(storagePath, fs.constants.R_OK | fs.constants.W_OK);
-        incrementor = all().length;
+        incrementor = all().length + 1;
     } catch (err) {
         write([]);
     }
@@ -28,12 +29,13 @@ export function find(id: number): Item|null {
 }
 
 export function write(nextItems: Item[]) {
-    fs.writeFileSync(storagePath, JSON.stringify(nextItems))
+    fs.writeFileSync(storagePath, JSON.stringify(nextItems));
+    dispatch();
 }
 
 export function push(item: Item) {
     const items = all();
-    if(item.id === null) {
+    if(!item.id) {
         item.id = incrementor++;
     }
     items.push(item);
@@ -44,6 +46,17 @@ export function remove(id: number) {
     const items: Item[] = all();
     const index = items.findIndex(item => item.id === id);
     if (index > -1) {
-        write(items.splice(index, 1));
+        items.splice(index, 1);
+        write([...items]);
+        return true;
     }
+    return false;
+}
+
+function dispatch()
+{
+    console.log('dispatch ' + wss.clients)
+    wss.clients.forEach((ws) => {
+        ws.send('hydrate!');
+    });
 }

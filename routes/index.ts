@@ -26,8 +26,7 @@ router.get('/item/:id/edit', (req, res) => {
 });
 
 router.get('/item/:id/delete', (req, res) => {
-    storage.remove(parseInt(req.params.id));
-    res.send()
+    res.send(storage.remove(parseInt(req.params.id)) ? 'yes' : 'no')
 });
 
 export {router as routes};

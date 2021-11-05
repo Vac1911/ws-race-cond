@@ -23,3 +23,4 @@ class SocketController {
 }
 exports.SocketController = SocketController;
 SocketController.registry = [];
+//# sourceMappingURL=SocketController.js.map
