@@ -1,0 +1,14 @@
+doctype html
+html(data-color-mode="dark" data-dark-theme="dark")
+    head
+        title=title
+        link(href="https://unpkg.com/@primer/css@^18.0.2/dist/primer.css" rel="stylesheet")
+        script(src='/build/components.js' type="module" async defered)
+    body
+        .container-xl.py-3
+            block content
+                .Layout
+                    .Layout-sidebar
+                        block sidebar
+                    .Layout-main
+                        block main

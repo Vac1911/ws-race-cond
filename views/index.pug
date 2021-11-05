@@ -1,0 +1,10 @@
+extends layout
+
+block sidebar
+    div= 'Sidebar'
+
+block main
+    .Box
+        ul#list
+            li.Box-row
+                a(href='/item')= 'Item List'
