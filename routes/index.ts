@@ -16,6 +16,10 @@ router.post('/item', (req, res) => {
     res.send('{"status": "Success"}');
 });
 
+router.get('/item/new', (req, res) => {
+    res.render('create', { title: 'Express'});
+});
+
 router.get('/item/:id', (req, res) => {
     const item = storage.find(parseInt(req.params.id));
     res.render('show', { title: 'Express', item: item});
