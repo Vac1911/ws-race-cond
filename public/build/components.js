@@ -182,66 +182,13 @@
 	    hostDisconnected() {
 	    }
 	    static onMessage(ev) {
-	        console.log(ev);
+	        for (let socketController of SocketController.registry) {
+	            socketController.host.onMessage(ev);
+	        }
 	    }
 	}
 	SocketController_2 = SocketController$1.SocketController = SocketController;
 	SocketController.registry = [];
-
-	"use strict";
-	var __decorate$1 = (commonjsGlobal && commonjsGlobal.__decorate) || function (decorators, target, key, desc) {
-	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-	    return c > 3 && r && Object.defineProperty(target, key, r), r;
-	};
-	var __awaiter = (commonjsGlobal && commonjsGlobal.__awaiter) || function (thisArg, _arguments, P, generator) {
-	    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-	    return new (P || (P = Promise))(function (resolve, reject) {
-	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-	        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-	        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-	        step((generator = generator.apply(thisArg, _arguments || [])).next());
-	    });
-	};
-	Object.defineProperty(HydratedSection$1, "__esModule", { value: true });
-	const lit_1$1 = require$$0;
-	const decorators_js_1$1 = require$$1;
-	const SocketController_1 = SocketController$1;
-	let HydratedSection = class HydratedSection extends lit_1$1.LitElement {
-	    constructor() {
-	        super(...arguments);
-	        this.socketController = new SocketController_1.SocketController(this);
-	        this.resource = '';
-	        this.identifier = '';
-	    }
-	    hydrate() {
-	        return __awaiter(this, void 0, void 0, function* () {
-	            const parser = new DOMParser();
-	            const req = yield fetch(window.location.href);
-	            const doc = parser.parseFromString(yield req.text(), 'text/html');
-	            const nextElement = doc.querySelector(`[tag="${this.tag}"]`);
-	            if (nextElement)
-	                this.innerHTML = nextElement.innerHTML;
-	        });
-	    }
-	    render() {
-	        return lit_1$1.html `<slot></slot>`;
-	    }
-	};
-	HydratedSection.styles = lit_1$1.css `p { color: blue }`;
-	__decorate$1([
-	    decorators_js_1$1.property({ reflect: true })
-	], HydratedSection.prototype, "resource", void 0);
-	__decorate$1([
-	    decorators_js_1$1.property({ reflect: true })
-	], HydratedSection.prototype, "identifier", void 0);
-	HydratedSection = __decorate$1([
-	    decorators_js_1$1.customElement('hydrated-section')
-	], HydratedSection);
-	var _default$1 = HydratedSection$1.default = HydratedSection;
-
-	var ExtendedForm$1 = {};
 
 	"use strict";
 	var __decorate = (commonjsGlobal && commonjsGlobal.__decorate) || function (decorators, target, key, desc) {
@@ -250,107 +197,50 @@
 	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
 	    return c > 3 && r && Object.defineProperty(target, key, r), r;
 	};
-	Object.defineProperty(ExtendedForm$1, "__esModule", { value: true });
+	Object.defineProperty(HydratedSection$1, "__esModule", { value: true });
 	const lit_1 = require$$0;
 	const decorators_js_1 = require$$1;
-	class ExtendedForm extends lit_1.LitElement {
+	const SocketController_1 = SocketController$1;
+	let HydratedSection = class HydratedSection extends lit_1.LitElement {
 	    constructor() {
 	        super(...arguments);
-	        this.method = 'POST';
-	        this.action = '';
-	        this.redirect = '';
-	        this.submitunchanged = false;
-	        this.data = {};
-	        this._initial = {};
+	        this.socketController = new SocketController_1.SocketController(this);
+	        this.resource = '';
+	        this.identifier = '';
 	    }
-	    connectedCallback() {
-	        super.connectedCallback();
-	        this.addEventListener("change", this._handleChange);
-	        this.addEventListener("click", this.handleSubmit);
-	        this.initData();
-	    }
-	    initData() {
-	        const inputs = Array.from(this.querySelectorAll('input, select, textarea'));
-	        for (let input of inputs) {
-	            if (input.name) {
-	                this._initial[input.name] = input.value;
-	                if (this.submitunchanged)
-	                    this.data[input.name] = input.value;
-	            }
+	    onMessage(ev) {
+	        const data = JSON.parse(ev.data);
+	        if (data['type'] == 'hydrate') {
+	            this.hydrate();
 	        }
+	        console.log(data);
 	    }
-	    resetInputs() {
-	        for (let [name, value] of Object.entries(this._initial)) {
-	            const input = this.querySelector(`[name="${name}"]`);
-	            if (input) {
-	                input.value = value;
-	            }
-	        }
-	        return this;
-	    }
-	    enableButtons() {
-	        // Enable all buttons disabled from submitting
-	        Array.from(this.querySelectorAll('button[disabled-by="submit"]')).map((b) => {
-	            b.classList.remove('disabled');
-	            b.removeAttribute('disabled-by');
-	        });
-	        return this;
-	    }
-	    _handleChange(e) {
-	        const key = e.target.getAttribute('name') || e.target.getAttribute('id');
-	        this.data[key] = e.target.value;
-	        console.log(this.data);
-	    }
-	    handleSubmit(e) {
-	        // If this event wasn't caused by a submit button, do not proceed
-	        const wasSubmit = e.composedPath().some((el) => (el === null || el === void 0 ? void 0 : el.type) === 'submit');
-	        if (!wasSubmit)
-	            return false;
-	        // Disable all buttons in form
-	        Array.from(this.querySelectorAll('button:not(.disabled)')).map((b) => {
-	            b.classList.add('disabled');
-	            b.setAttribute('disabled-by', 'submit');
-	        });
-	        fetch(this.action, {
-	            method: this.method,
-	            headers: new Headers({ 'content-type': 'application/json' }),
-	            body: JSON.stringify(this.data),
-	        })
-	            .then((response) => response.json())
-	            .then(this.afterSave.bind(this));
-	    }
-	    afterSave(data) {
-	        const event = new CustomEvent("saved", {
-	            detail: data,
-	            cancelable: true,
-	            bubbles: true
-	        });
-	        const cancelled = !this.dispatchEvent(event);
-	        if (!cancelled) {
-	            console.log('Saved', this.data);
-	        }
+	    async hydrate() {
+	        const parser = new DOMParser();
+	        const req = await fetch(window.location.href);
+	        const doc = parser.parseFromString(await req.text(), 'text/html');
+	        const selector = 'hydrated-section' +
+	            (this.resource ? `[resource="${this.resource}"]` : '') +
+	            (this.identifier ? `[identifier="${this.identifier}"]` : '');
+	        const nextElement = doc.querySelector(selector);
+	        if (nextElement)
+	            this.innerHTML = nextElement.innerHTML;
 	    }
 	    render() {
 	        return lit_1.html `
             <slot></slot>`;
 	    }
-	}
+	};
+	HydratedSection.styles = lit_1.css `p { color: blue }`;
 	__decorate([
-	    decorators_js_1.property({ type: String })
-	], ExtendedForm.prototype, "method", void 0);
+	    decorators_js_1.property({ reflect: true })
+	], HydratedSection.prototype, "resource", void 0);
 	__decorate([
-	    decorators_js_1.property({ type: String })
-	], ExtendedForm.prototype, "action", void 0);
-	__decorate([
-	    decorators_js_1.property({ type: String })
-	], ExtendedForm.prototype, "redirect", void 0);
-	__decorate([
-	    decorators_js_1.property({ type: Boolean })
-	], ExtendedForm.prototype, "submitunchanged", void 0);
-	__decorate([
-	    decorators_js_1.property({ attribute: false })
-	], ExtendedForm.prototype, "data", void 0);
-	var _default = ExtendedForm$1.default = ExtendedForm;
-	customElements.define("extended-form", ExtendedForm);
+	    decorators_js_1.property({ reflect: true })
+	], HydratedSection.prototype, "identifier", void 0);
+	HydratedSection = __decorate([
+	    decorators_js_1.customElement('hydrated-section')
+	], HydratedSection);
+	var _default = HydratedSection$1.default = HydratedSection;
 
 }));

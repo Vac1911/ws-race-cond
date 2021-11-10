@@ -18,7 +18,9 @@ class SocketController {
     hostDisconnected() {
     }
     static onMessage(ev) {
-        console.log(ev);
+        for (let socketController of SocketController.registry) {
+            socketController.host.onMessage(ev);
+        }
     }
 }
 exports.SocketController = SocketController;

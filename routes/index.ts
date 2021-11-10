@@ -30,7 +30,8 @@ router.get('/item/:id/edit', (req, res) => {
 });
 
 router.get('/item/:id/delete', (req, res) => {
-    res.send(storage.remove(parseInt(req.params.id)) ? 'yes' : 'no')
+    storage.remove(parseInt(req.params.id));
+    res.redirect('/item');
 });
 
 export {router as routes};

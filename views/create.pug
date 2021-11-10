@@ -1,6 +1,16 @@
 extends layout
 
-block body
-    extended-form.d-flex(action="/item" method="POST")
-        input.form-control.mr-3.flex-1(type="text" name="name")
-        button.btn.btn-primary(type="submit")= 'Add'
+block content
+    div
+        extended-form.d-block(action="/item" method="POST")
+            .form-group
+                .form-group-header
+                    label= 'Name'
+                .form-group-body
+                    input.form-control(type="text" name="name")
+            .form-group
+                .form-group-header
+                    label= 'Email'
+                .form-group-body
+                    input.form-control(type="email" name="email")
+            button.btn.btn-primary(type="submit")= 'Add'

@@ -1,15 +1,11 @@
 import * as fs from 'fs';
 import * as path from "path";
 import {wss} from "../server";
+import {UserModel} from "./models/UserModel";
 
 const storagePath = path.join(__dirname, './items.json');
 let incrementor = 1;
 init();
-
-interface Item {
-    id: number|null,
-    name: string,
-}
 
 function init() {
     try {
@@ -20,20 +16,20 @@ function init() {
     }
 }
 
-export function all(): Item[] {
-    return JSON.parse(fs.readFileSync(storagePath).toString());
+export function all(): UserModel[] {
+    return JSON.parse(fs.readFileSync(storagePath).toString()).map(data => new UserModel(data));
 }
 
-export function find(id: number): Item|null {
+export function find(id: number): UserModel|null {
     return all().find(item => item.id === id);
 }
 
-export function write(nextItems: Item[]) {
+export function write(nextItems: UserModel[]) {
     fs.writeFileSync(storagePath, JSON.stringify(nextItems));
     dispatch();
 }
 
-export function push(item: Item) {
+export function push(item: UserModel) {
     const items = all();
     if(!item.id) {
         item.id = incrementor++;
@@ -43,7 +39,7 @@ export function push(item: Item) {
 }
 
 export function remove(id: number) {
-    const items: Item[] = all();
+    const items: UserModel[] = all();
     const index = items.findIndex(item => item.id === id);
     if (index > -1) {
         items.splice(index, 1);
@@ -55,8 +51,10 @@ export function remove(id: number) {
 
 function dispatch()
 {
-    console.log('dispatch ' + wss.clients)
+    console.log('dispatch ' + wss.clients.size)
     wss.clients.forEach((ws) => {
-        ws.send('hydrate!');
+        ws.send(JSON.stringify({
+            type: 'hydrate'
+        }));
     });
 }

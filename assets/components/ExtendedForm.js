@@ -58,7 +58,7 @@ class ExtendedForm extends lit_1.LitElement {
     }
     handleSubmit(e) {
         // If this event wasn't caused by a submit button, do not proceed
-        const wasSubmit = e.composedPath().some((el) => (el === null || el === void 0 ? void 0 : el.type) === 'submit');
+        const wasSubmit = e.composedPath().some((el) => el?.type === 'submit');
         if (!wasSubmit)
             return false;
         // Disable all buttons in form
@@ -84,6 +84,8 @@ class ExtendedForm extends lit_1.LitElement {
         if (!cancelled) {
             console.log('Saved', this.data);
         }
+        // this.resetInputs();
+        // this.enableButtons();
     }
     render() {
         return lit_1.html `
@@ -107,4 +109,3 @@ __decorate([
 ], ExtendedForm.prototype, "data", void 0);
 exports.default = ExtendedForm;
 customElements.define("extended-form", ExtendedForm);
-//# sourceMappingURL=ExtendedForm.js.map

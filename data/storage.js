@@ -4,6 +4,7 @@ exports.remove = exports.push = exports.write = exports.find = exports.all = voi
 const fs = require("fs");
 const path = require("path");
 const server_1 = require("../server");
+const UserModel_1 = require("./models/UserModel");
 const storagePath = path.join(__dirname, './items.json');
 let incrementor = 1;
 init();
@@ -17,7 +18,7 @@ function init() {
     }
 }
 function all() {
-    return JSON.parse(fs.readFileSync(storagePath).toString());
+    return JSON.parse(fs.readFileSync(storagePath).toString()).map(data => new UserModel_1.UserModel(data));
 }
 exports.all = all;
 function find(id) {
@@ -50,9 +51,11 @@ function remove(id) {
 }
 exports.remove = remove;
 function dispatch() {
-    console.log('dispatch ' + server_1.wss.clients);
+    console.log('dispatch ' + server_1.wss.clients.size);
     server_1.wss.clients.forEach((ws) => {
-        ws.send('hydrate!');
+        ws.send(JSON.stringify({
+            type: 'hydrate'
+        }));
     });
 }
 //# sourceMappingURL=storage.js.map

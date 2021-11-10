@@ -8,7 +8,7 @@ block main
         .Box-header.d-flex.flex-justify-between
             h2.Box-title= 'Item List'
             a.btn.btn-sm.btn-primary(href='/item/new')= 'New'
-        hydrated-sectionli.Box-body.d-block
+        hydrated-section.Box-body.d-block(resource="user")
             ul#list.ActionList.ActionList--divided(role="menu")
                 if items.length
                     each item in items

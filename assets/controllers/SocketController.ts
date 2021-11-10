@@ -1,11 +1,15 @@
 import {ReactiveController, ReactiveControllerHost} from "lit";
 
+export interface SocketControllerHost extends ReactiveControllerHost {
+    onMessage(ev: MessageEvent): void;
+}
+
 export class SocketController implements ReactiveController {
-    private host: ReactiveControllerHost;
+    private host: SocketControllerHost;
     static socket: WebSocket;
     static registry: SocketController[] = [];
 
-    constructor(host: ReactiveControllerHost) {
+    constructor(host: SocketControllerHost) {
         SocketController.init();
         (this.host = host).addController(this);
         SocketController.registry.push(this);
@@ -25,6 +29,8 @@ export class SocketController implements ReactiveController {
     }
 
     static onMessage(ev: MessageEvent) {
-        console.log(ev);
+        for(let socketController of SocketController.registry) {
+            socketController.host.onMessage(ev);
+        }
     }
 }

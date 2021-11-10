@@ -95,6 +95,8 @@ export default class ExtendedForm extends LitElement {
         if (!cancelled) {
             console.log('Saved', this.data);
         }
+        // this.resetInputs();
+        // this.enableButtons();
     }
 
     render() {

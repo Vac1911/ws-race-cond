@@ -1,9 +1,9 @@
-import {html, css, LitElement} from 'lit';
+import {css, html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-import {SocketController} from "../controllers/SocketController";
+import {SocketController, SocketControllerHost} from "../controllers/SocketController";
 
 @customElement('hydrated-section')
-export default class HydratedSection extends LitElement {
+export default class HydratedSection extends LitElement implements SocketControllerHost {
     static styles = css`p { color: blue }`;
     private socketController = new SocketController(this);
 
@@ -13,15 +13,27 @@ export default class HydratedSection extends LitElement {
     @property({reflect: true})
     identifier: string = '';
 
+    onMessage(ev: MessageEvent) {
+        const data: object = JSON.parse(ev.data);
+        if (data['type'] == 'hydrate') {
+            this.hydrate();
+        }
+        console.log(data);
+    }
+
     async hydrate() {
         const parser: DOMParser = new DOMParser();
         const req: Response = await fetch(window.location.href);
         const doc: Document = parser.parseFromString(await req.text(), 'text/html');
-        const nextElement = doc.querySelector(`[tag="${this.tag}"]`);
-        if(nextElement) this.innerHTML = nextElement.innerHTML;
+        const selector: string = 'hydrated-section' +
+            (this.resource ? `[resource="${this.resource}"]` : '') +
+            (this.identifier ? `[identifier="${this.identifier}"]` : '');
+        const nextElement = doc.querySelector(selector);
+        if (nextElement) this.innerHTML = nextElement.innerHTML;
     }
 
     render() {
-        return html`<slot></slot>`;
+        return html`
+            <slot></slot>`;
     }
 }
