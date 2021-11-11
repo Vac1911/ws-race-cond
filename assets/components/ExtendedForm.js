@@ -56,15 +56,15 @@ class ExtendedForm extends lit_1.LitElement {
         this.data[key] = e.target.value;
         console.log(this.data);
     }
-    handleSubmit(e) {
+    handleSubmit(ev) {
         // If this event wasn't caused by a submit button, do not proceed
-        const wasSubmit = e.composedPath().some((el) => el?.type === 'submit');
+        const wasSubmit = ev.composedPath().some((el) => el?.type === 'submit');
         if (!wasSubmit)
             return false;
         // Disable all buttons in form
-        Array.from(this.querySelectorAll('button:not(.disabled)')).map((b) => {
-            b.classList.add('disabled');
-            b.setAttribute('disabled-by', 'submit');
+        Array.from(this.querySelectorAll('button:not(.disabled)')).map((btn) => {
+            btn.classList.add('disabled');
+            btn.setAttribute('disabled-by', 'submit');
         });
         fetch(this.action, {
             method: this.method,
@@ -80,12 +80,14 @@ class ExtendedForm extends lit_1.LitElement {
             cancelable: true,
             bubbles: true
         });
-        const cancelled = !this.dispatchEvent(event);
-        if (!cancelled) {
+        this.dispatchEvent(event);
+        if (!event.defaultPrevented) {
             console.log('Saved', this.data);
+            if (data.hasOwnProperty('redirect'))
+                window.location = data['redirect'];
+            else
+                this.enableButtons();
         }
-        // this.resetInputs();
-        // this.enableButtons();
     }
     render() {
         return lit_1.html `

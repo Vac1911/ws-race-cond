@@ -3,16 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = void 0;
 const Model_1 = require("./Model");
 class UserModel extends Model_1.Model {
-    constructor() {
-        super(...arguments);
-        this.resource = 'user';
-    }
-    get id() {
-        return this.get('id');
-    }
-    set id(val) {
-        this.set('id', val);
-    }
     get name() {
         return this.get('name');
     }
@@ -25,6 +15,10 @@ class UserModel extends Model_1.Model {
     set email(val) {
         this.set('email', val);
     }
+    static create(attributes) {
+        return new UserModel({}).fill(attributes);
+    }
 }
 exports.UserModel = UserModel;
+UserModel.resource = 'user';
 //# sourceMappingURL=UserModel.js.map

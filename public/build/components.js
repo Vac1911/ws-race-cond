@@ -191,17 +191,17 @@
 	SocketController.registry = [];
 
 	"use strict";
-	var __decorate = (commonjsGlobal && commonjsGlobal.__decorate) || function (decorators, target, key, desc) {
+	var __decorate$3 = (commonjsGlobal && commonjsGlobal.__decorate) || function (decorators, target, key, desc) {
 	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
 	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
 	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
 	    return c > 3 && r && Object.defineProperty(target, key, r), r;
 	};
 	Object.defineProperty(HydratedSection$1, "__esModule", { value: true });
-	const lit_1 = require$$0;
-	const decorators_js_1 = require$$1;
+	const lit_1$3 = require$$0;
+	const decorators_js_1$3 = require$$1;
 	const SocketController_1 = SocketController$1;
-	let HydratedSection = class HydratedSection extends lit_1.LitElement {
+	let HydratedSection = class HydratedSection extends lit_1$3.LitElement {
 	    constructor() {
 	        super(...arguments);
 	        this.socketController = new SocketController_1.SocketController(this);
@@ -227,20 +227,282 @@
 	            this.innerHTML = nextElement.innerHTML;
 	    }
 	    render() {
-	        return lit_1.html `
+	        return lit_1$3.html `
             <slot></slot>`;
 	    }
 	};
-	HydratedSection.styles = lit_1.css `p { color: blue }`;
-	__decorate([
-	    decorators_js_1.property({ reflect: true })
+	HydratedSection.styles = lit_1$3.css `p { color: blue }`;
+	__decorate$3([
+	    decorators_js_1$3.property({ reflect: true })
 	], HydratedSection.prototype, "resource", void 0);
-	__decorate([
-	    decorators_js_1.property({ reflect: true })
+	__decorate$3([
+	    decorators_js_1$3.property({ reflect: true })
 	], HydratedSection.prototype, "identifier", void 0);
-	HydratedSection = __decorate([
-	    decorators_js_1.customElement('hydrated-section')
+	HydratedSection = __decorate$3([
+	    decorators_js_1$3.customElement('hydrated-section')
 	], HydratedSection);
-	var _default = HydratedSection$1.default = HydratedSection;
+	var _default$1 = HydratedSection$1.default = HydratedSection;
+
+	var ExtendedForm$1 = {};
+
+	"use strict";
+	var __decorate$2 = (commonjsGlobal && commonjsGlobal.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	Object.defineProperty(ExtendedForm$1, "__esModule", { value: true });
+	const lit_1$2 = require$$0;
+	const decorators_js_1$2 = require$$1;
+	class ExtendedForm extends lit_1$2.LitElement {
+	    constructor() {
+	        super(...arguments);
+	        this.method = 'POST';
+	        this.action = '';
+	        this.redirect = '';
+	        this.submitunchanged = false;
+	        this.data = {};
+	        this._initial = {};
+	    }
+	    connectedCallback() {
+	        super.connectedCallback();
+	        this.addEventListener("change", this._handleChange);
+	        this.addEventListener("click", this.handleSubmit);
+	        this.initData();
+	    }
+	    initData() {
+	        const inputs = Array.from(this.querySelectorAll('input, select, textarea'));
+	        for (let input of inputs) {
+	            if (input.name) {
+	                this._initial[input.name] = input.value;
+	                if (this.submitunchanged)
+	                    this.data[input.name] = input.value;
+	            }
+	        }
+	    }
+	    resetInputs() {
+	        for (let [name, value] of Object.entries(this._initial)) {
+	            const input = this.querySelector(`[name="${name}"]`);
+	            if (input) {
+	                input.value = value;
+	            }
+	        }
+	        return this;
+	    }
+	    enableButtons() {
+	        // Enable all buttons disabled from submitting
+	        Array.from(this.querySelectorAll('button[disabled-by="submit"]')).map((b) => {
+	            b.classList.remove('disabled');
+	            b.removeAttribute('disabled-by');
+	        });
+	        return this;
+	    }
+	    _handleChange(e) {
+	        const key = e.target.getAttribute('name') || e.target.getAttribute('id');
+	        this.data[key] = e.target.value;
+	        console.log(this.data);
+	    }
+	    handleSubmit(ev) {
+	        // If this event wasn't caused by a submit button, do not proceed
+	        const wasSubmit = ev.composedPath().some((el) => el?.type === 'submit');
+	        if (!wasSubmit)
+	            return false;
+	        // Disable all buttons in form
+	        Array.from(this.querySelectorAll('button:not(.disabled)')).map((btn) => {
+	            btn.classList.add('disabled');
+	            btn.setAttribute('disabled-by', 'submit');
+	        });
+	        fetch(this.action, {
+	            method: this.method,
+	            headers: new Headers({ 'content-type': 'application/json' }),
+	            body: JSON.stringify(this.data),
+	        })
+	            .then((response) => response.json())
+	            .then(this.afterSave.bind(this));
+	    }
+	    afterSave(data) {
+	        const event = new CustomEvent("saved", {
+	            detail: data,
+	            cancelable: true,
+	            bubbles: true
+	        });
+	        this.dispatchEvent(event);
+	        if (!event.defaultPrevented) {
+	            console.log('Saved', this.data);
+	            if (data.hasOwnProperty('redirect'))
+	                window.location = data['redirect'];
+	            else
+	                this.enableButtons();
+	        }
+	    }
+	    render() {
+	        return lit_1$2.html `
+            <slot></slot>`;
+	    }
+	}
+	__decorate$2([
+	    decorators_js_1$2.property({ type: String })
+	], ExtendedForm.prototype, "method", void 0);
+	__decorate$2([
+	    decorators_js_1$2.property({ type: String })
+	], ExtendedForm.prototype, "action", void 0);
+	__decorate$2([
+	    decorators_js_1$2.property({ type: String })
+	], ExtendedForm.prototype, "redirect", void 0);
+	__decorate$2([
+	    decorators_js_1$2.property({ type: Boolean })
+	], ExtendedForm.prototype, "submitunchanged", void 0);
+	__decorate$2([
+	    decorators_js_1$2.property({ attribute: false })
+	], ExtendedForm.prototype, "data", void 0);
+	var _default = ExtendedForm$1.default = ExtendedForm;
+	customElements.define("extended-form", ExtendedForm);
+
+	var DynamicModal$1 = {};
+
+	"use strict";
+	var __decorate$1 = (commonjsGlobal && commonjsGlobal.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	Object.defineProperty(DynamicModal$1, "__esModule", { value: true });
+	var DynamicModal_2 = DynamicModal$1.DynamicModal = void 0;
+	const lit_1$1 = require$$0;
+	const decorators_js_1$1 = require$$1;
+	class DynamicModal extends lit_1$1.LitElement {
+	    constructor() {
+	        super(...arguments);
+	        this.width = '48rem';
+	    }
+	    static get styles() {
+	        return lit_1$1.css `
+        :host {
+            display: block;
+        }
+        .wrapper {
+            background-color: rgba(107,114,128,0.5); position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; justify-content: center; align-items: center; z-index: 10;
+        }
+        .modal {
+            background-color: rgba(255,255,255,1); min-height: 6rem;
+        }
+        `;
+	    }
+	    render() {
+	        return lit_1$1.html `<div class="wrapper" style="${this.open ? '' : 'display: none'}">
+            <div class="modal" style="width: ${this.width}">
+                <slot></slot>
+            </div>
+        </div>`;
+	    }
+	}
+	__decorate$1([
+	    decorators_js_1$1.property({ type: Boolean })
+	], DynamicModal.prototype, "open", void 0);
+	__decorate$1([
+	    decorators_js_1$1.property()
+	], DynamicModal.prototype, "width", void 0);
+	DynamicModal_2 = DynamicModal$1.DynamicModal = DynamicModal;
+	if (!customElements.get('dynamic-modal'))
+	    customElements.define('dynamic-modal', DynamicModal);
+
+	var PromptConfirm$1 = {};
+
+	"use strict";
+	var __decorate = (commonjsGlobal && commonjsGlobal.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	Object.defineProperty(PromptConfirm$1, "__esModule", { value: true });
+	var PromptConfirm_2 = PromptConfirm$1.PromptConfirm = openPromptConfirm_1 = PromptConfirm$1.openPromptConfirm = void 0;
+	const lit_1 = require$$0;
+	const decorators_js_1 = require$$1;
+	function openPromptConfirm(header, msg) {
+	    // @ts-ignore
+	    let promptComponent = document.createElement('prompt-confirm');
+	    promptComponent.header = header;
+	    promptComponent.msg = msg;
+	    document.body.append(promptComponent);
+	    return promptComponent.response;
+	}
+	var openPromptConfirm_1 = PromptConfirm$1.openPromptConfirm = openPromptConfirm;
+	class PromptConfirm extends lit_1.LitElement {
+	    constructor() {
+	        super();
+	        this.createResponse();
+	        this.header = '';
+	        this.msg = '';
+	    }
+	    static get styles() {
+	        return lit_1.css `
+            #heading {
+                font-size: 1.5rem;
+                font-weight: 500;
+                line-height: 1.2;
+            }
+            #heading, #msg {
+                margin-bottom: 1rem;
+            }
+            #promptForm {
+                padding: 1rem;
+            }
+        `;
+	    }
+	    get promptFormData() {
+	        return true;
+	        // let data = new FormData(this.promptForm);
+	        // // @ts-ignore
+	        // return Object.fromEntries([...data.entries()]);
+	    }
+	    createResponse() {
+	        this.response = new Promise((res, reject) => {
+	            this.resolve = res;
+	        });
+	    }
+	    handleResponse(ev) {
+	        ev.preventDefault();
+	        this.resolve(this.promptFormData);
+	    }
+	    handleCancel() {
+	        this.resolve(false);
+	    }
+	    resolve(value) { }
+	    render() {
+	        return lit_1.html `
+        <dynamic-modal width="32rem" open>
+            <form id="promptForm" @submit="${this.handleResponse}">
+                <div id="heading">
+                    ${this.header}
+                </div>
+                <div id="msg">
+                    ${this.msg}
+                </div>
+                <div style="display: flex; justify-content: space-between">
+                    <button part="btn btn-secondary" type="button" @click="${this.handleCancel}">Cancel</button>
+                    <button part="btn btn-primary" type="submit">Ok</button>
+                </div>
+            </form>
+        </dynamic-modal>
+        `;
+	    }
+	}
+	__decorate([
+	    decorators_js_1.property()
+	], PromptConfirm.prototype, "header", void 0);
+	__decorate([
+	    decorators_js_1.property()
+	], PromptConfirm.prototype, "msg", void 0);
+	__decorate([
+	    decorators_js_1.query('#first')
+	], PromptConfirm.prototype, "promptForm", void 0);
+	PromptConfirm_2 = PromptConfirm$1.PromptConfirm = PromptConfirm;
+	if (!customElements.get('prompt-confirm'))
+	    customElements.define('prompt-confirm', PromptConfirm);
+
+	window.openPromptConfirm = openPromptConfirm_1;
 
 }));

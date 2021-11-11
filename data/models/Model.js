@@ -9,6 +9,12 @@ class Model {
         this._original = Object.assign({}, attributes);
         this._attributes = Object.assign({}, attributes);
     }
+    get id() {
+        return this.get('id');
+    }
+    set id(val) {
+        this.set('id', val);
+    }
     hasChanged() {
         return lodash_1.isEqual(this._original, this._attributes);
     }
@@ -21,6 +27,10 @@ class Model {
     }
     fill(attributes) {
         this._attributes = Object.assign(this._attributes, attributes);
+        return this;
+    }
+    serialize() {
+        return Object.assign({}, this._attributes);
     }
 }
 exports.Model = Model;

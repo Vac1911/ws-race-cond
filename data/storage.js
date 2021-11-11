@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.remove = exports.push = exports.write = exports.find = exports.all = void 0;
+exports.remove = exports.push = exports.update = exports.write = exports.find = exports.all = void 0;
 const fs = require("fs");
 const path = require("path");
 const server_1 = require("../server");
@@ -11,7 +11,9 @@ init();
 function init() {
     try {
         fs.accessSync(storagePath, fs.constants.R_OK | fs.constants.W_OK);
-        incrementor = all().length + 1;
+        const items = all();
+        if (items.length)
+            incrementor = Math.max(...all().map(m => m.id)) + 1;
     }
     catch (err) {
         write([]);
@@ -26,10 +28,17 @@ function find(id) {
 }
 exports.find = find;
 function write(nextItems) {
-    fs.writeFileSync(storagePath, JSON.stringify(nextItems));
-    dispatch();
+    fs.writeFileSync(storagePath, JSON.stringify(nextItems.map(item => item.serialize())));
 }
 exports.write = write;
+function update(item) {
+    const items = all();
+    const index = items.findIndex(_item => _item.id === item.id);
+    items[index] = item;
+    write(items);
+    dispatch(item.constructor['resource'], item.id);
+}
+exports.update = update;
 function push(item) {
     const items = all();
     if (!item.id) {
@@ -37,6 +46,7 @@ function push(item) {
     }
     items.push(item);
     write(items);
+    dispatch(item.constructor['resource'], item.id);
 }
 exports.push = push;
 function remove(id) {
@@ -50,11 +60,13 @@ function remove(id) {
     return false;
 }
 exports.remove = remove;
-function dispatch() {
+function dispatch(resource, identifier = null) {
     console.log('dispatch ' + server_1.wss.clients.size);
     server_1.wss.clients.forEach((ws) => {
         ws.send(JSON.stringify({
-            type: 'hydrate'
+            type: 'hydrate',
+            resource: resource,
+            identifier: identifier,
         }));
     });
 }

@@ -9,6 +9,14 @@ export class Model {
         this._attributes = Object.assign({}, attributes);
     }
 
+    get id() {
+        return this.get('id');
+    }
+
+    set id(val: number) {
+        this.set('id', val);
+    }
+
     hasChanged(): boolean {
         return isEqual(this._original, this._attributes);
     }
@@ -22,7 +30,12 @@ export class Model {
         return this;
     }
 
-    fill(attributes: object) {
+    fill(attributes: object): Model {
         this._attributes = Object.assign(this._attributes, attributes);
+        return this;
+    }
+
+    serialize() {
+        return Object.assign({}, this._attributes);
     }
 }
